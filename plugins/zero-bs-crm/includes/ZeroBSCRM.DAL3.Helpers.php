@@ -1255,6 +1255,7 @@ function zeroBS_getCustomers(
 		if (!$zbs->isDAL2()) $actualPage = $page-1;  // only DAL1 needed this
 		if ($actualPage < 0) $actualPage = 0;
 
+		$ownedByID = get_current_user_id();
 		// make ARGS
 		$args = array(
 
@@ -1292,6 +1293,12 @@ function zeroBS_getCustomers(
 
 			$args['ignoreowner'] = false;
 
+		}
+		// kanhai changed
+		// ignore owner for admin
+		if( current_user_can('administrator') ) {
+			$args['ignoreowner'] = true;
+			$args['ownedBy'] = false;
 		}
 
 		return $zbs->DAL->contacts->getContacts($args);
@@ -1334,6 +1341,9 @@ function zeroBS_getCustomersCountIncParams(
 			'ignoreowner'		=> zeroBSCRM_DAL2_ignoreOwnership(ZBS_TYPE_CONTACT)
 
 		);
+
+		//kanhai changed
+		$args['ignoreowner'] = current_user_can('administrator') ? true : false;
 
 		return (int)$zbs->DAL->contacts->getContacts($args);
 
@@ -9095,7 +9105,11 @@ function zeroBSCRM_GenerateTempHash($str=-1,$length=20){
 		// FOR NOW EVERYONE CAN SEE EVERYTHING
 		// Later add - strict ownership? isn't this a platform UPSELL?
 		// if ($zbs->settings->get('perusercustomers') && !current_user_can('administrator')) return false;
+		if (!current_user_can('administrator')) return false;
 
+		// var_dump($zbs->settings->get('perusercustomers'));
+		// var_dump(current_user_can('administrator'));
+		// exit();
 		return true;
 
 	}

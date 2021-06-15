@@ -115,6 +115,7 @@ class zbsDAL_events extends zbsDAL_ObjectLayer {
     public function getAll($IDs=false){
 
         return $this->getEvents(array(
+            // 'ownedBy'       => current_user_can('administrator') ? false : get_current_user_id(),
             'sortByField'   => 'ID',
             'sortOrder'     => 'ASC',
             'page'          => -1,
@@ -366,7 +367,8 @@ class zbsDAL_events extends zbsDAL_ObjectLayer {
             'inArr'             => false,
             'isTagged'          => false, // 1x INT OR array(1,2,3)
             'isNotTagged'       => false, // 1x INT OR array(1,2,3)
-            'ownedBy'           => false,
+            'ownedBy'           => current_user_can('administrator') ? false : get_current_user_id(), //false,
+            // 'ownedBy'           => get_current_user_id(),
             'externalSource'    => false, // e.g. paypal
             'olderThan'         => false, // uts (on CREATED)
             'newerThan'         => false, // uts (on CREATED)
@@ -396,10 +398,19 @@ class zbsDAL_events extends zbsDAL_ObjectLayer {
             'whereCase'          => 'AND', // DEFAULT = AND
 
             // permissions
-            'ignoreowner'   => zeroBSCRM_DAL2_ignoreOwnership(ZBS_TYPE_EVENT), // this'll let you not-check the owner of obj
+            'ignoreowner'   => current_user_can('administrator') ? false : true, //zeroBSCRM_DAL2_ignoreOwnership(ZBS_TYPE_EVENT), // this'll let you not-check the owner of obj
+        );
 
+        if(current_user_can('administrator') && !isset($_REQUEST['zbsowner'])) {
+            $args['ownedBy'] = false;
+            $args['ignoreowner'] = true;
+        }
+        elseif(isset($_REQUEST['zbsowner'])) {
+            $args['ownedBy'] = $_REQUEST['zbsowner'];
+            $args['ignoreowner'] = true;
+        }
 
-        ); foreach ($defaultArgs as $argK => $argV){ $$argK = $argV; if (is_array($args) && isset($args[$argK])) {  if (is_array($args[$argK])){ $newData = $$argK; if (!is_array($newData)) $newData = array(); foreach ($args[$argK] as $subK => $subV){ $newData[$subK] = $subV; }$$argK = $newData;} else { $$argK = $args[$argK]; } } }
+        foreach ($defaultArgs as $argK => $argV){ $$argK = $argV; if (is_array($args) && isset($args[$argK])) {  if (is_array($args[$argK])){ $newData = $$argK; if (!is_array($newData)) $newData = array(); foreach ($args[$argK] as $subK => $subV){ $newData[$subK] = $subV; }$$argK = $newData;} else { $$argK = $args[$argK]; } } }
         #} =========== / LOAD ARGS =============
 
         global $ZBSCRM_t,$wpdb,$zbs;  

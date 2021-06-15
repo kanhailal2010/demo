@@ -938,10 +938,13 @@ class zbsDAL_contacts extends zbsDAL_ObjectLayer {
             // PLEASE do not use the or switch without discussing case with WH
             'additionalWhereArr' => false, 
             'whereCase'          => 'AND' // DEFAULT = AND
+        );
+        // // kanhai changed
+        // if( current_user_can('administrator') ) {
+        //     $defaultArgs['ignoreowner'] = true;
+        // }
 
-
-
-        ); foreach ($defaultArgs as $argK => $argV){ $$argK = $argV; if (is_array($args) && isset($args[$argK])) {  if (is_array($args[$argK])){ $newData = $$argK; if (!is_array($newData)) $newData = array(); foreach ($args[$argK] as $subK => $subV){ $newData[$subK] = $subV; }$$argK = $newData;} else { $$argK = $args[$argK]; } } }
+        foreach ($defaultArgs as $argK => $argV){ $$argK = $argV; if (is_array($args) && isset($args[$argK])) {  if (is_array($args[$argK])){ $newData = $$argK; if (!is_array($newData)) $newData = array(); foreach ($args[$argK] as $subK => $subV){ $newData[$subK] = $subV; }$$argK = $newData;} else { $$argK = $args[$argK]; } } }
         #} =========== / LOAD ARGS =============
 
         global $ZBSCRM_t,$wpdb,$zbs;  
@@ -4292,15 +4295,22 @@ class zbsDAL_contacts extends zbsDAL_ObjectLayer {
 
         #} ============ LOAD ARGS =============
         $defaultArgs = array(
-
             // Search/Filtering (leave as false to ignore)
             'inCompany'     => false, // will be an ID if used
             'withStatus'    => false, // will be str if used
-
             // permissions
             'ignoreowner'   => true, // this'll let you not-check the owner of obj
+        );
 
-        ); foreach ($defaultArgs as $argK => $argV){ $$argK = $argV; if (is_array($args) && isset($args[$argK])) {  if (is_array($args[$argK])){ $newData = $$argK; if (!is_array($newData)) $newData = array(); foreach ($args[$argK] as $subK => $subV){ $newData[$subK] = $subV; }$$argK = $newData;} else { $$argK = $args[$argK]; } } }
+        // kanhai changed
+        if(current_user_can('administrator')) {
+            $args['ignoreowner'] = false;
+            $args['ownedBy'] = false;
+        }
+        else {
+            $args['ownedBy'] = get_current_user_id();
+        }
+        foreach ($defaultArgs as $argK => $argV){ $$argK = $argV; if (is_array($args) && isset($args[$argK])) {  if (is_array($args[$argK])){ $newData = $$argK; if (!is_array($newData)) $newData = array(); foreach ($args[$argK] as $subK => $subV){ $newData[$subK] = $subV; }$$argK = $newData;} else { $$argK = $args[$argK]; } } }
         #} =========== / LOAD ARGS =============
 
         $whereArr = array();
